@@ -11,6 +11,8 @@ using AngleSharp.Html.Parser;
 using AngleSharp.Html.Dom;
 using System.Linq;
 using AngleSharp.Dom;
+using NixonWilliamsScraper.Models;
+using NixonWilliamsScraper.Scrapers;
 
 namespace NixonWilliamsScraper
 {
@@ -25,6 +27,13 @@ namespace NixonWilliamsScraper
 
         static async Task Main(string[] args)
         {
+            (string x, string y) p = ("", "");
+            FormattableString str = $"x={p.x} y={p.y}";
+
+            foreach (var a in str.GetArguments())
+                Console.WriteLine($"{a.ToString()}");
+            Done();
+
             Console.WriteLine("Hello World!");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
@@ -32,14 +41,18 @@ namespace NixonWilliamsScraper
             //await Login("andy.pook@gmail.com", "p1sw0rd");
             //await GetDashboard();
 
-            foreach (var t in await ParseBanks(new FileStream("..\\..\\..\\NW-banks.html", FileMode.Open)))
+            foreach (var t in await new BankScraper(client).Parse("..\\..\\..\\NW-banks.html"))
                 Console.WriteLine(t);
             //await ParseDashboard(new FileStream("..\\..\\..\\NW-dashboard.html", FileMode.Open));
             //foreach (var t in await ParseTransactions(new FileStream("..\\..\\..\\NW-transactions.html", FileMode.Open)))
             //    Console.WriteLine(t);
             //foreach (var t in await ParseTransactionAllocations(new FileStream("..\\..\\..\\NW-allocation.html", FileMode.Open)))
             //    Console.WriteLine(t);
+            Done();
+        }
 
+        static void Done()
+        {
             Console.WriteLine("done...");
             Console.ReadLine();
         }
@@ -110,49 +123,6 @@ namespace NixonWilliamsScraper
                 }
             }
         }
-
-        static async Task<IEnumerable<Bank>> GetBanks()
-        {
-            var response = await client.GetAsync("/bank_accounts");
-            var stream = await response.Content.ReadAsStreamAsync();
-            return await ParseBanks(stream);
-        }
-
-        static async Task<IEnumerable<Bank>> ParseBanks(Stream stream)
-        {
-            var doc = await new HtmlParser().ParseDocumentAsync(stream);
-
-            var transTable = doc.QuerySelector("table.auto_links");
-            var transRows = transTable.QuerySelectorAll("tbody tr");
-            return GetBank().ToList();
-
-            IEnumerable<Bank> GetBank()
-            {
-                foreach (var row in transRows)
-                {
-                    var tds = row.QuerySelectorAll("td");
-                    if (!tds.Any())
-                        continue;
-                    yield return new Bank
-                    {
-                        BankId = GetBankId(tds[5]),
-                        AccountName = tds[0].TextContent,
-                        BankName = tds[1].TextContent,
-                        AccountNumber = tds[2].TextContent,
-                        SortCode = tds[3].TextContent,
-                        Balance = GetMoney(tds[4].TextContent)
-                    };
-                }
-            }
-
-            string GetBankId(IElement element)
-            {
-                var href = element.Children[0].GetAttribute("href");
-                var bankUi = new Uri(href);
-                return bankUi.Segments.Last();
-            }
-        }
-
 
         static async Task<IEnumerable<BankTransaction>> GetTransactions(int bankId)
         {
@@ -231,42 +201,5 @@ namespace NixonWilliamsScraper
             return decimal.Parse(text.TrimStart('£'));
         }
 
-    }
-
-    public class Bank
-    {
-        public string BankId { get; set; }
-        public string AccountName { get; set; }
-        public string BankName { get; set; }
-        public string AccountNumber { get; set; }
-        public string SortCode { get; set; }
-        public decimal Balance { get; set; }
-
-        public override string ToString()=>$"{BankId} {AccountName} {BankName} {AccountNumber} {SortCode} {Balance}";
-    }
-
-    public class BankTransaction
-    {
-        public string Type { get; set; }
-        public string Urn { get; set; }
-        public string DateId { get; set; }
-        public string Date { get; set; }
-        public string Description { get; set; }
-        public decimal MoneyIn { get; set; }
-        public decimal MoneyOut { get; set; }
-        public decimal Balance { get; set; }
-        public bool IsAllocated { get; set; }
-
-        public override string ToString() => $"{Date,10} {Description,20}";
-    }
-
-    public class BankTransactionAllocation
-    {
-        public decimal Allocation { get; set; }
-        public decimal VAT { get; set; }
-        public string Category { get; set; }
-        public string Explanation { get; set; }
-
-        public override string ToString() => $"{Allocation} {VAT} {Category} {Explanation}";
     }
 }
