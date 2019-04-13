@@ -12,7 +12,7 @@ using AngleSharp.Html.Dom;
 using System.Linq;
 using AngleSharp.Dom;
 
-namespace NixonWilliamsScrape
+namespace NixonWilliamsScraper
 {
     class Program
     {
