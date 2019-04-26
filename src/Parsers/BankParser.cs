@@ -1,27 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AngleSharp.Html.Parser;
 using System.Linq;
 using AngleSharp.Dom;
 using NixonWilliamsScraper.Models;
 
-namespace NixonWilliamsScraper.Scrapers
+namespace NixonWilliamsScraper.Parsers
 {
-    public class BankScraper : ScraperBase<IEnumerable<Bank>>
+    public class BankParser : IParser<IEnumerable<Bank>>
     {
-        public BankScraper(HttpClient client) : base(client) { }
-
-        public override async Task<IEnumerable<Bank>> Get()
-        {
-            var response = await client.GetAsync("/bank_accounts");
-            var stream = await response.Content.ReadAsStreamAsync();
-            return await Parse(stream);
-        }
-
-        public override async Task<IEnumerable<Bank>> Parse(Stream stream)
+        public async Task<IEnumerable<Bank>> Parse(Stream stream)
         {
             var doc = await new HtmlParser().ParseDocumentAsync(stream);
 
@@ -43,7 +33,7 @@ namespace NixonWilliamsScraper.Scrapers
                         BankName = tds[1].TextContent,
                         AccountNumber = tds[2].TextContent,
                         SortCode = tds[3].TextContent,
-                        Balance = GetMoney(tds[4].TextContent)
+                        Balance = Parser.GetMoney(tds[4].TextContent)
                     };
                 }
             }
