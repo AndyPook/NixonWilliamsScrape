@@ -1,64 +1,70 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NixonWilliamsScraper.Models;
-using NixonWilliamsScraper.Parsers;
 
 namespace NixonWilliamsScraper
 {
     public class VantageCrawler
     {
+        public const string DashboardPath = "/dashboard/index";
+        public const string CompanyYearsPath = "/company/year_end";
+        public const string BankAccountsPath = "/bank_accounts";
+
+        public static string GetPath(string path)
+        {
+            switch (path)
+            {
+                case DashboardPath: return "dashboard";
+                case CompanyYearsPath: return "years";
+                case BankAccountsPath: return "banks";
+            }
+
+            return path;
+        }
+
         private IPageGetter getter;
-        private IDocHandler handler;
+        private readonly IPageHandler pageHandler;
+        private IDocHandler docHandler;
 
         private Dashboard dashboard;
+        private CompanyYears years;
         private Banks banks;
+
+        public VantageCrawler(IPageGetter getter, IPageHandler pageHandler, IDocHandler docHandler = null)
+        {
+            this.getter = getter ?? throw new ArgumentNullException(nameof(getter));
+            this.docHandler = docHandler;
+            this.pageHandler = pageHandler;
+        }
 
         public async Task Crawl()
         {
             dashboard = await GetDashBoard();
+            years = await GetYears();
             banks = await GetBanks();
         }
 
-        public async Task<Dashboard> GetDashBoard() => await Get<Dashboard>("/dashboard/index");
+        public async Task<Dashboard> GetDashBoard() => await Get<Dashboard>(DashboardPath);
 
-        public async Task<Banks> GetBanks() => await GetAndHandle<Banks>("/bank_accounts");
+        public async Task<CompanyYears> GetYears() => await Get<CompanyYears>(CompanyYearsPath);
 
-        public async Task<BankTransactions> GetTransactions(string bankId) 
+        public async Task<Banks> GetBanks() => await Get<Banks>(BankAccountsPath);
+
+        public async Task<BankTransactions> GetTransactions(string bankId)
             => await Get<BankTransactions>($"/bank_accounts/transactions/index/bank_account/{bankId}");
 
         public async Task<BankTransactionAllocation> GetTransactionAllocation(string bankId, string dataUrn)
             => await Get<BankTransactionAllocation>($"/bank_accounts/transactions/index/bank_account/{bankId}/urn/{dataUrn}");
 
-        public async Task<T> GetAndHandle<T>(string path)
-        {
-            var doc = await Get<T>(path);
-            await handler.Handle(doc);
-            return doc;
-        }
-
         public async Task<T> Get<T>(string path)
         {
-            var page = await getter.Get(path);
-            var parser = GetParser<T>();
-            var doc = await parser.Parse(page);
-            return doc;
-        }
-
-        private IParser<T> GetParser<T>()
-        {
-            if (typeof(T) == typeof(Banks))
-                return (IParser<T>)new BankParser();
-            if (typeof(T) == typeof(BankTransactions))
-                return (IParser<T>)new TransactionParser();
-            if (typeof(T) == typeof(BankTransactionAllocation))
-                return (IParser<T>)new TransactionAllocationParser();
-            if (typeof(T) == typeof(Dashboard))
-                return (IParser<T>)new DashboardParser();
-
-            throw new InvalidOperationException("Not parser available for " + typeof(T).Name);
+            using (var page = await getter.Get(path))
+            {
+                var doc = await pageHandler.Handle<T>(path, page);
+                if (docHandler != null)
+                    await docHandler.Handle(path, doc);
+                return doc;
+            }
         }
     }
-
-
 }

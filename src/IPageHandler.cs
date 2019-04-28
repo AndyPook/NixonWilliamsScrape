@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace NixonWilliamsScraper
 {
-    public interface IPageGetter
+    public interface IPageHandler
     {
-        Task<Stream> Get(string path);
+        Task<T> Handle<T>(string path, Stream stream);
     }
 }

@@ -22,8 +22,34 @@ namespace NixonWilliamsScraper
         {
             BaseAddress = baseUri
         };
-
         static async Task Main(string[] args)
+        {
+            //var crawler = await GetHttpCrawler();
+            var crawler = GetFileCrawler();
+            await crawler.Crawl();
+
+            Done();
+        }
+
+        static async Task<VantageCrawler> GetHttpCrawler()
+        {
+            var getter = new VantageGetter();
+            await getter.Login("andy.pook@gmail.com", "p1sw0rd");
+            var pageHandler = new PageCachingHandler(new PageHandler(), "..\\..\\..\\..\\pagecache");
+            var docHandler = new FileDocHandler("..\\..\\..\\..\\docs");
+
+            return new VantageCrawler(getter, pageHandler, docHandler);
+        }
+
+            static VantageCrawler GetFileCrawler()
+        {
+            var getter = new FileGetter("..\\..\\..\\..\\pagecache");
+            var pageHandler = new PageHandler();
+            var docHandler = new FileDocHandler("..\\..\\..\\..\\docs");
+            return new VantageCrawler(getter, pageHandler, docHandler);
+        }
+
+        static async Task Main2(string[] args)
         {
             //(string x, string y) p = ("", "");
             //FormattableString str = $"x={p.x} y={p.y}";
@@ -39,8 +65,14 @@ namespace NixonWilliamsScraper
             //await Login("andy.pook@gmail.com", "p1sw0rd");
             //await GetDashboard();
 
+            //https://www.nixonwilliamsvantage.com/company/year_end/set_year_end/urn/5651/target/dashboard
+
             Console.WriteLine("----- Banks");
             foreach (var t in await new BankParser().Parse("..\\..\\..\\..\\NW-banks.html"))
+                Console.WriteLine(t);
+
+            Console.WriteLine("----- Years");
+            foreach (var t in await new CompanyYearsParser().Parse("..\\..\\..\\..\\NW-years.html"))
                 Console.WriteLine(t);
 
             Console.WriteLine("\n----- Dashboard");

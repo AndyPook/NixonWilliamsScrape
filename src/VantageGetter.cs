@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace NixonWilliamsScraper
 {
-    public class HttpGetter : IPageGetter
+    public class VantageGetter : IPageGetter
     {
         private Uri baseUri = new Uri("https://www.nixonwilliamsvantage.com");
         private CookieContainer cookies = new CookieContainer();
         private HttpClient client;
 
-        public HttpGetter()
+        public VantageGetter()
         {
             client = new HttpClient(new HttpClientHandler { CookieContainer = cookies })
             {
@@ -26,7 +26,7 @@ namespace NixonWilliamsScraper
 
         public async Task<Stream> Get(string path)
         {
-            var response = await client.GetAsync("/dashboard/index");
+            var response = await client.GetAsync(path);
             return await response.Content.ReadAsStreamAsync();
         }
 
