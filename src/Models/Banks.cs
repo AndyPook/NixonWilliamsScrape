@@ -1,5 +1,10 @@
-﻿namespace NixonWilliamsScraper.Models
+﻿using System.Collections.Generic;
+
+namespace NixonWilliamsScraper.Models
 {
-    public class Banks : CollectionOf<Bank> { }
+    public class Banks : CollectionOf<Bank>
+    {
+        public Banks(IEnumerable<Bank> items) : base(items) { }
+    }
 
 }

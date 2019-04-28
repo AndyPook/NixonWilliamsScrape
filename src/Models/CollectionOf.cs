@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NixonWilliamsScraper.Models
 {
@@ -16,7 +17,7 @@ namespace NixonWilliamsScraper.Models
 
         protected CollectionOf() { }
 
-        private CollectionOf(IEnumerable<T> items)
+        protected CollectionOf(IEnumerable<T> items)
         {
             this.items = items.ToList();
         }

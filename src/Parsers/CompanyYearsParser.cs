@@ -1,48 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AngleSharp.Html.Parser;
 using System.Linq;
-using AngleSharp.Dom;
 using NixonWilliamsScraper.Models;
+using AngleSharp.Dom;
+using System;
 
 namespace NixonWilliamsScraper.Parsers
 {
-    public class BankParser : IParser<Banks>
+    public class CompanyYearsParser : IParser<CompanyYears>
     {
-        public async Task<Banks> Parse(Stream stream)
+        public async Task<CompanyYears> Parse(Stream stream)
         {
             var doc = await new HtmlParser().ParseDocumentAsync(stream);
 
             var transTable = doc.QuerySelector("table.auto_links");
             var transRows = transTable.QuerySelectorAll("tbody tr");
-            return new Banks(GetBanks());
+            return new CompanyYears(GetYears());
 
-            IEnumerable<Bank> GetBanks()
+            IEnumerable<CompanyYear> GetYears()
             {
                 foreach (var row in transRows)
                 {
                     var tds = row.QuerySelectorAll("td");
                     if (!tds.Any())
                         continue;
-                    yield return new Bank
+                    yield return new CompanyYear
                     {
-                        BankId = GetBankId(tds[5]),
-                        AccountName = tds[0].TextContent,
-                        BankName = tds[1].TextContent,
-                        AccountNumber = tds[2].TextContent,
-                        SortCode = tds[3].TextContent,
-                        Balance = Parser.GetMoney(tds[4].TextContent)
+                        Start = tds[0].TextContent,
+                        End = tds[1].TextContent,
+                        Current = tds[2].TextContent == "Current",
+                        SetYearEnd = GetSetYearEnd(tds[3])
                     };
                 }
             }
 
-            string GetBankId(IElement element)
+            Uri GetSetYearEnd(IElement element)
             {
                 var href = element.Children[0].GetAttribute("href");
-                var bankUi = new Uri(href);
-                return bankUi.Segments.Last();
+                return new Uri(href);
             }
         }
     }

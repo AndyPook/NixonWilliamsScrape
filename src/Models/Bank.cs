@@ -1,6 +1,5 @@
 ﻿namespace NixonWilliamsScraper.Models
 {
-
     public class Bank
     {
         public string BankId { get; set; }
