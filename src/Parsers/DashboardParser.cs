@@ -14,12 +14,15 @@ namespace NixonWilliamsScraper.Parsers
             var page = new HtmlParser();
             var doc = await page.ParseDocumentAsync(stream);
 
+            var dashboard = new Dashboard();
+
+            var bc = doc.QuerySelector("div.breadcrumbscont");
+            dashboard.YearStart = DateTime.Parse(bc.NextElementSibling.TextContent.Substring(11, 10)); 
+            dashboard.YearEnd = DateTime.Parse(bc.NextElementSibling.TextContent.Substring(24, 10));
+
             var h1 = doc.QuerySelector("h1");
-            Console.WriteLine(h1.TextContent);
 
             var parts = doc.QuerySelectorAll("div.dashboardwidgetinner");
-
-            var dashboard = new Dashboard();
 
             foreach (var part in parts)
             {

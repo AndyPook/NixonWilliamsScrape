@@ -22,11 +22,14 @@ namespace NixonWilliamsScraper
         {
             BaseAddress = baseUri
         };
+
         static async Task Main(string[] args)
         {
-            //var crawler = await GetHttpCrawler();
-            var crawler = GetFileCrawler();
+            var crawler = await GetHttpCrawler();
+            //var crawler = GetFileCrawler();
             await crawler.Crawl();
+
+            //await Test();
 
             Done();
         }
@@ -49,7 +52,7 @@ namespace NixonWilliamsScraper
             return new VantageCrawler(getter, pageHandler, docHandler);
         }
 
-        static async Task Main2(string[] args)
+        static async Task Test()
         {
             //(string x, string y) p = ("", "");
             //FormattableString str = $"x={p.x} y={p.y}";
@@ -67,36 +70,36 @@ namespace NixonWilliamsScraper
 
             //https://www.nixonwilliamsvantage.com/company/year_end/set_year_end/urn/5651/target/dashboard
 
-            Console.WriteLine("----- Banks");
-            foreach (var t in await new BankParser().Parse("..\\..\\..\\..\\NW-banks.html"))
-                Console.WriteLine(t);
+            //Console.WriteLine("----- Banks");
+            //foreach (var t in await new BankParser().Parse("..\\..\\..\\..\\NW-banks.html"))
+            //    Console.WriteLine(t);
 
-            Console.WriteLine("----- Years");
-            foreach (var t in await new CompanyYearsParser().Parse("..\\..\\..\\..\\NW-years.html"))
-                Console.WriteLine(t);
+            //Console.WriteLine("----- Years");
+            //foreach (var t in await new CompanyYearsParser().Parse("..\\..\\..\\..\\NW-years.html"))
+            //    Console.WriteLine(t);
 
-            Console.WriteLine("\n----- Dashboard");
-            var dashboard = await new DashboardParser().Parse("..\\..\\..\\..\\NW-dashboard.html");
-            foreach (var section in dashboard.Sections)
-            {
-                Console.WriteLine(section.Heading);
-                foreach (var item in section.Items)
-                {
-                    Console.WriteLine($"  {item.Name} {item.Value}");
-                    if (!string.IsNullOrEmpty(item.Href))
-                        Console.WriteLine("    " + item.Href);
-                }
-            }
+            //Console.WriteLine("\n----- Dashboard");
+            //var dashboard = await new DashboardParser().Parse("..\\..\\..\\..\\NW-dashboard.html");
+            //foreach (var section in dashboard.Sections)
+            //{
+            //    Console.WriteLine(section.Heading);
+            //    foreach (var item in section.Items)
+            //    {
+            //        Console.WriteLine($"  {item.Name} {item.Value}");
+            //        if (!string.IsNullOrEmpty(item.Href))
+            //            Console.WriteLine("    " + item.Href);
+            //    }
+            //}
 
             Console.WriteLine("\n----- Transactions");
-            foreach (var t in await new TransactionParser().Parse("..\\..\\..\\..\\NW-transactions.html"))
+            var tx = await new TransactionParser().Parse("..\\..\\..\\..\\NW-transactions.html");
+            Console.WriteLine($"{tx.BankId} {tx.YearStart.Year}-{tx.YearEnd.Year}");
+            foreach (var t in tx.Transactions)
                 Console.WriteLine(t);
 
-            Console.WriteLine("\n----- Allocations");
-            foreach (var t in await new TransactionAllocationParser().Parse("..\\..\\..\\..\\NW-allocation.html"))
-                Console.WriteLine(t);
-
-            Done();
+            //Console.WriteLine("\n----- Allocations");
+            //foreach (var t in await new TransactionAllocationParser().Parse("..\\..\\..\\..\\NW-allocation.html"))
+            //    Console.WriteLine(t);
         }
 
         static void Done()

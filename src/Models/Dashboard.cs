@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NixonWilliamsScraper.Models
 {
     public class Dashboard
     {
+        public DateTime YearStart { get; set; }
+        public DateTime YearEnd { get; set; }
+
         public ICollection<Section> Sections { get; } = new List<Section>();
 
         public class Section

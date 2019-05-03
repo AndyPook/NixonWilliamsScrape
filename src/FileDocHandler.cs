@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
+using NixonWilliamsScraper.Models;
 using System.IO;
 using System.Threading.Tasks;
 namespace NixonWilliamsScraper
@@ -14,7 +16,7 @@ namespace NixonWilliamsScraper
 
         public Task Handle<T>(string path, T item)
         {
-            var fullPath = Path.Combine(rootPath, VantageCrawler.GetPath(path)) + ".json";
+            var fullPath = Path.Combine(rootPath, GetPath(item));
             using (var file = File.CreateText(fullPath))
             {
                 var serializer = JsonSerializer.Create(new JsonSerializerSettings
@@ -25,6 +27,19 @@ namespace NixonWilliamsScraper
             }
 
             return Task.CompletedTask;
+        }
+
+        private string GetPath<T>(T item)
+        {
+            switch (item)
+            {
+                case Banks _: return "banks.json";
+                case CompanyYears _: return "years.json";
+                case Dashboard _: return "dashboard.json";
+                case BankTransactions t: return $"{t.YearStart.Year}-tx-{t.BankId}.json";
+            }
+
+            throw new ArgumentOutOfRangeException($"doc type unknown: {typeof(T).Name}");
         }
     }
 }

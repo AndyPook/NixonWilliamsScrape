@@ -25,6 +25,8 @@ namespace NixonWilliamsScraper
             memory.Position = 0;
             var fullPath = Path.Combine(rootPath, VantageCrawler.GetPath(path));
 
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
             using (var file = File.Create(fullPath))
                 await memory.CopyToAsync(file);
             memory.Position = 0;

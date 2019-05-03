@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NixonWilliamsScraper.Models;
 
@@ -9,7 +10,7 @@ namespace NixonWilliamsScraper
         public const string DashboardPath = "/dashboard/index";
         public const string CompanyYearsPath = "/company/year_end";
         public const string BankAccountsPath = "/bank_accounts";
-
+        public const string BankTransactionsPath = "/bank_accounts/transactions/index/bank_account/";
         public static string GetPath(string path)
         {
             switch (path)
@@ -39,9 +40,20 @@ namespace NixonWilliamsScraper
 
         public async Task Crawl()
         {
+            Console.WriteLine("--- Dashboard");
             dashboard = await GetDashBoard();
+            Console.WriteLine("--- Years");
             years = await GetYears();
+            Console.WriteLine("--- Banks");
             banks = await GetBanks();
+
+            //var currentYear = years.FirstOrDefault(y => y.Current);
+
+            foreach (var bank in banks)
+            {
+                Console.WriteLine($"--- Transactions {bank.BankId}");
+                var tx = await GetTransactions(bank.BankId);
+            }
         }
 
         public async Task<Dashboard> GetDashBoard() => await Get<Dashboard>(DashboardPath);

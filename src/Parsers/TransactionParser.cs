@@ -1,22 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using AngleSharp.Html.Parser;
 using System.Linq;
 using AngleSharp.Dom;
+using AngleSharp.Html.Parser;
 using NixonWilliamsScraper.Models;
 
 namespace NixonWilliamsScraper.Parsers
 {
-    public class TransactionParser : IParser<CollectionOf<BankTransaction>>
+    public class TransactionParser : IParser<BankTransactions>
     {
-        public async Task<CollectionOf<BankTransaction>> Parse(Stream stream)
+        public async Task<BankTransactions> Parse(Stream stream)
         {
             var doc = await new HtmlParser().ParseDocumentAsync(stream);
 
             var transTable = doc.QuerySelector("#transactions");
             var transRows = transTable.QuerySelectorAll("tbody tr");
-            return CollectionOf.Create(GetTransactions());
+            var result = new BankTransactions(GetTransactions());
+
+            var details = doc.QuerySelectorAll("h3").FirstOrDefault(h => h.ChildElementCount == 0 && h.TextContent == "Account Details");
+            result.BankId = GetBankId(details.NextElementSibling);
+
+            var co = doc.QuerySelectorAll("h4").FirstOrDefault(h => h.ChildElementCount == 0 && h.TextContent == "Company Overview");
+            var yearsText = co.NextElementSibling.FirstChild.TextContent;
+            var years = yearsText.Split('-');
+            result.YearStart = DateTime.Parse(years[0]);
+            result.YearEnd = DateTime.Parse(years[1]);
+
+            return result;
 
             IEnumerable<BankTransaction> GetTransactions()
             {
@@ -35,6 +47,13 @@ namespace NixonWilliamsScraper.Parsers
                         IsAllocated = tds[5].ClassName.Contains("allocated")
                     };
                 }
+            }
+
+            string GetBankId(IElement element)
+            {
+                var href = element.GetAttribute("action");
+                var bankUi = new Uri(href);
+                return bankUi.Segments.Last();
             }
         }
     }
