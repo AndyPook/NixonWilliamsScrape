@@ -33,7 +33,7 @@ namespace NixonWilliamsScraper.Parsers
                         BankName = tds[1].TextContent,
                         AccountNumber = tds[2].TextContent,
                         SortCode = tds[3].TextContent,
-                        Balance = Parser.GetMoney(tds[4].TextContent)
+                        Balance = Parser.GetMoney(tds[4])
                     };
                 }
             }

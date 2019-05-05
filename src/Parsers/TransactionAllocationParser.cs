@@ -24,8 +24,8 @@ namespace NixonWilliamsScraper.Parsers
                     var tds = row.QuerySelectorAll("td.al");
                     yield return new BankTransactionAllocation
                     {
-                        Allocation = Parser.GetMoney(tds[0].TextContent),
-                        VAT = Parser.GetMoney(tds[1].TextContent),
+                        Allocation = Parser.GetMoney(tds[0]),
+                        VAT = Parser.GetMoney(tds[1]),
                         Category = tds[2].TextContent,
                         Explanation = tds[3].TextContent
                     };

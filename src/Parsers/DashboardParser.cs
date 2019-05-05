@@ -48,7 +48,7 @@ namespace NixonWilliamsScraper.Parsers
                     {
                         item.Name = col1.TextContent;
                     }
-                    item.Value = Parser.GetMoney(tr.Children[1].TextContent);
+                    item.Value = Parser.GetMoney(tr.Children[1]);
                 }
             }
 

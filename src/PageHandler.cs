@@ -19,14 +19,21 @@ namespace NixonWilliamsScraper
         {
             if (typeof(T) == typeof(Banks))
                 return (IParser<T>)new BankParser();
-            if (typeof(T) == typeof(BankTransactions))
-                return (IParser<T>)new TransactionParser();
-            if (typeof(T) == typeof(BankTransactionAllocation))
-                return (IParser<T>)new TransactionAllocationParser();
-            if (typeof(T) == typeof(Dashboard))
-                return (IParser<T>)new DashboardParser();
             if (typeof(T) == typeof(CompanyYears))
                 return (IParser<T>)new CompanyYearsParser();
+            if (typeof(T) == typeof(Dashboard))
+                return (IParser<T>)new DashboardParser();
+
+            if (typeof(T) == typeof(BankTransactions))
+                return (IParser<T>)new BankTransactionParser();
+            if (typeof(T) == typeof(BankTransactionAllocation))
+                return (IParser<T>)new TransactionAllocationParser();
+
+            if (typeof(T) == typeof(Expenses))
+                return (IParser<T>)new ExpensesParser();
+
+            if (typeof(T) == typeof(Dividends))
+                return (IParser<T>)new DividendsParser();
 
             throw new InvalidOperationException("No parser available for " + typeof(T).Name);
         }

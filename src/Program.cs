@@ -25,8 +25,9 @@ namespace NixonWilliamsScraper
 
         static async Task Main(string[] args)
         {
-            var crawler = await GetHttpCrawler();
+            var crawler = await GetHttpCrawler(args);
             //var crawler = GetFileCrawler();
+
             await crawler.Crawl();
 
             //await Test();
@@ -34,10 +35,12 @@ namespace NixonWilliamsScraper
             Done();
         }
 
-        static async Task<VantageCrawler> GetHttpCrawler()
+        static async Task<VantageCrawler> GetHttpCrawler(string[] args)
         {
+            var user = args[0];
+            var pw = args[1];
             var getter = new VantageGetter();
-            await getter.Login("andy.pook@gmail.com", "p1sw0rd");
+            await getter.Login(user, pw);
             var pageHandler = new PageCachingHandler(new PageHandler(), "..\\..\\..\\..\\pagecache");
             var docHandler = new FileDocHandler("..\\..\\..\\..\\docs");
 
@@ -92,7 +95,7 @@ namespace NixonWilliamsScraper
             //}
 
             Console.WriteLine("\n----- Transactions");
-            var tx = await new TransactionParser().Parse("..\\..\\..\\..\\NW-transactions.html");
+            var tx = await new BankTransactionParser().Parse("..\\..\\..\\..\\NW-transactions.html");
             Console.WriteLine($"{tx.BankId} {tx.YearStart.Year}-{tx.YearEnd.Year}");
             foreach (var t in tx.Transactions)
                 Console.WriteLine(t);

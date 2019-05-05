@@ -4,12 +4,12 @@ namespace NixonWilliamsScraper.Models
 {
     public class CompanyYear
     {
-        public string Start { get; set; }
-        public string End { get; set; }
+        public DateTime YearStart { get; set; }
+        public DateTime YearEnd { get; set; }
         public bool Current { get; set; }
 
         public Uri SetYearEnd { get; set; }
 
-        public override string ToString() => $"{Start} {End} {Current} {SetYearEnd}";
+        public override string ToString() => $"{YearStart} {YearEnd} {Current} {SetYearEnd}";
     }
 }

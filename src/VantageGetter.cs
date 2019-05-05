@@ -39,8 +39,8 @@ namespace NixonWilliamsScraper
                 { "btn_submit", "Login" }
             });
 
+            Console.WriteLine($"login...");
             var response = await client.PostAsync("/system/login", request);
-
             Console.WriteLine($"login: {response.StatusCode}");
         }
     }

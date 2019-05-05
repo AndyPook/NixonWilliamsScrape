@@ -28,8 +28,8 @@ namespace NixonWilliamsScraper.Parsers
                         continue;
                     yield return new CompanyYear
                     {
-                        Start = tds[0].TextContent,
-                        End = tds[1].TextContent,
+                        YearStart = DateTime.Parse(tds[0].TextContent),
+                        YearEnd = DateTime.Parse(tds[1].TextContent),
                         Current = tds[2].TextContent == "Current",
                         SetYearEnd = GetSetYearEnd(tds[3])
                     };
@@ -38,8 +38,14 @@ namespace NixonWilliamsScraper.Parsers
 
             Uri GetSetYearEnd(IElement element)
             {
-                var href = element.Children[0].GetAttribute("href");
-                return new Uri(href);
+                foreach (var child in element.Children)
+                {
+                    var href = child.GetAttribute("href");
+                    if (href.Contains("set_year_end"))
+                        return new Uri(href);
+                }
+
+                throw new InvalidOperationException("no set_year_end urn found");
             }
         }
     }
